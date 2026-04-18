@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.5.1
+FROM rocker/r-ver:4.5.3
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV R_PORT_PROJECT_ROOT=/app
@@ -8,21 +8,17 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+       ca-certificates \
        libcurl4-openssl-dev \
        libssl-dev \
        libxml2-dev \
-       libfontconfig1-dev \
-       libfreetype6-dev \
-       libpng-dev \
-       libtiff5-dev \
-       libjpeg-dev \
        make \
        g++ \
        gcc \
        gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-RUN R -q -e "install.packages(c('plumber','jsonlite','nnet','e1071','randomForest','ggplot2'), repos='https://cloud.r-project.org')"
+RUN R -q -e "options(repos = c(CRAN = 'https://cloud.r-project.org')); install.packages(c('plumber','nnet','e1071','randomForest'), Ncpus = max(1L, parallel::detectCores() - 1L))"
 
 COPY R ./R
 COPY data ./data
