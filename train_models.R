@@ -1,0 +1,5 @@
+Sys.setenv(R_PORT_PROJECT_ROOT = normalizePath(getwd(), winslash = "/", mustWork = FALSE))
+source(file.path(getwd(), "R", "bootstrap.R"))
+source(file.path(project_root, "R", "training.R"))
+report <- train_and_save()
+cat(jsonlite::toJSON(report, pretty = TRUE, auto_unbox = TRUE), "\n")

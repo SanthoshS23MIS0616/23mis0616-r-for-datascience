@@ -1,0 +1,41 @@
+Plumber                 Package Plumber Router
+PlumberEndpoint         Plumber Endpoint
+PlumberStatic           Static file router
+PlumberStep             plumber step R6 class
+as_attachment           Return an attachment response
+endpoint_serializer     Endpoint Serializer with Hooks
+forward                 Forward Request to The Next Handler
+get_character_set       Request character set
+include_file            Send File Contents as Response
+is_plumber              Determine if Plumber object
+options_plumber         Plumber options
+parser_form             Plumber Parsers
+plumb                   Process a Plumber API
+plumb_api               Process a Package's Plumber API
+pr                      Create a new Plumber router
+pr_cookie               Store session data in encrypted cookies.
+pr_filter               Add a filter to Plumber router
+pr_handle               Add handler to Plumber router
+pr_hook                 Register a hook
+pr_mount                Mount a Plumber router
+pr_run                  Start a server using 'plumber' object
+pr_set_404              Set the handler that is called when the
+                        incoming request can't be served
+pr_set_api_spec         Set the OpenAPI Specification
+pr_set_debug            Set debug value to include error messages of
+                        routes cause an error
+pr_set_docs             Set the API visual documentation
+pr_set_docs_callback    Set the 'callback' to tell where the API visual
+                        documentation is located
+pr_set_error            Set the error handler that is invoked if any
+                        filter or endpoint generates an error
+pr_set_parsers          Set the default endpoint parsers for the router
+pr_set_serializer       Set the default serializer of the router
+pr_static               Add a static route to the 'plumber' object
+random_cookie_key       Random cookie key generator
+register_docs           Add visual documentation for plumber to use
+register_parser         Manage parsers
+register_serializer     Register a Serializer
+serializer_headers      Plumber Serializers
+session_cookie          Store session data in encrypted cookies.
+validate_api_spec       Validate OpenAPI Spec

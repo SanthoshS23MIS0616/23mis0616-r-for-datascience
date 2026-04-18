@@ -1,0 +1,201 @@
+{
+  "data_mode": "r_realistic_v2_native_pipeline",
+  "dataset_summary": {
+    "classification_rows": 8333,
+    "regression_rows": 12000,
+    "crop_count": 13,
+    "state_count": 33
+  },
+  "classification_metrics": {
+    "multinom": {
+      "train_accuracy": 0.9309,
+      "train_f1_weighted": 0.9307,
+      "train_top3_accuracy": 0.9988,
+      "accuracy": 0.9207,
+      "f1_weighted": 0.9216,
+      "top3_accuracy": 0.9988
+    },
+    "decision_tree": {
+      "train_accuracy": 0.0271,
+      "train_f1_weighted": 0.0278,
+      "train_top3_accuracy": 0.3705,
+      "accuracy": 0.0252,
+      "f1_weighted": 0.0243,
+      "top3_accuracy": 0.3558
+    },
+    "random_forest": {
+      "train_accuracy": 0.9952,
+      "train_f1_weighted": 0.9952,
+      "train_top3_accuracy": 1,
+      "accuracy": 0.9165,
+      "f1_weighted": 0.914,
+      "top3_accuracy": 0.9958
+    },
+    "ensemble": {
+      "train_accuracy": 0.9633,
+      "train_f1_weighted": 0.9632,
+      "train_top3_accuracy": 1,
+      "accuracy": 0.9285,
+      "f1_weighted": 0.9289,
+      "top3_accuracy": 0.9994
+    }
+  },
+  "regression_metrics": {
+    "train_rmse": 1.911,
+    "train_r2": 0.9303,
+    "rmse": 2.1865,
+    "r2": 0.8995
+  },
+  "model_comparison": {
+    "best_classification_model": "ensemble",
+    "best_regression_model": "random_forest_regressor"
+  },
+  "xai_summary": {
+    "status": "ok",
+    "classification_importance_plot": "C:/Users/santhosh/OneDrive/Desktop/r for data science/reports/classification_feature_importance.png",
+    "regression_importance_plot": "C:/Users/santhosh/OneDrive/Desktop/r for data science/reports/regression_feature_importance.png",
+    "top_features": [
+      {
+        "feature": "potassium",
+        "multinom_importance": 0.9859,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.8369,
+        "mean_importance": 0.6076
+      },
+      {
+        "feature": "seasonWhole Year",
+        "multinom_importance": 1,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.7647,
+        "mean_importance": 0.5882
+      },
+      {
+        "feature": "nitrogen",
+        "multinom_importance": 0.6276,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.8092,
+        "mean_importance": 0.4789
+      },
+      {
+        "feature": "phosphorous",
+        "multinom_importance": 0.5972,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.8126,
+        "mean_importance": 0.4699
+      },
+      {
+        "feature": "humidity",
+        "multinom_importance": 0.4561,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.7589,
+        "mean_importance": 0.405
+      },
+      {
+        "feature": "rainfall_mm",
+        "multinom_importance": 0.1955,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 1,
+        "mean_importance": 0.3985
+      },
+      {
+        "feature": "seasonKharif",
+        "multinom_importance": 0.7335,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.3626,
+        "mean_importance": 0.3654
+      },
+      {
+        "feature": "state_nameManipur",
+        "multinom_importance": 0.9121,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0108,
+        "mean_importance": 0.3076
+      },
+      {
+        "feature": "state_nameMadhya Pradesh",
+        "multinom_importance": 0.8078,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0469,
+        "mean_importance": 0.2849
+      },
+      {
+        "feature": "state_nameWest Bengal",
+        "multinom_importance": 0.719,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0946,
+        "mean_importance": 0.2712
+      },
+      {
+        "feature": "state_nameKerala",
+        "multinom_importance": 0.7862,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0187,
+        "mean_importance": 0.2683
+      },
+      {
+        "feature": "state_nameAssam",
+        "multinom_importance": 0.6567,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.148,
+        "mean_importance": 0.2682
+      },
+      {
+        "feature": "state_nameBihar",
+        "multinom_importance": 0.649,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0765,
+        "mean_importance": 0.2418
+      },
+      {
+        "feature": "state_nameAndhra Pradesh",
+        "multinom_importance": 0.6619,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0391,
+        "mean_importance": 0.2337
+      },
+      {
+        "feature": "moisture",
+        "multinom_importance": 0.4006,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.293,
+        "mean_importance": 0.2312
+      },
+      {
+        "feature": "state_nameKarnataka",
+        "multinom_importance": 0.612,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.041,
+        "mean_importance": 0.2176
+      },
+      {
+        "feature": "state_nameMeghalaya",
+        "multinom_importance": 0.6296,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0197,
+        "mean_importance": 0.2164
+      },
+      {
+        "feature": "state_nameMaharashtra",
+        "multinom_importance": 0.6035,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0325,
+        "mean_importance": 0.212
+      },
+      {
+        "feature": "state_nameChhattisgarh",
+        "multinom_importance": 0.5689,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0193,
+        "mean_importance": 0.1961
+      },
+      {
+        "feature": "state_nameUttar Pradesh",
+        "multinom_importance": 0.5082,
+        "decision_tree_importance": 0,
+        "random_forest_importance": 0.0606,
+        "mean_importance": 0.1896
+      }
+    ]
+  },
+  "warnings": []
+}
