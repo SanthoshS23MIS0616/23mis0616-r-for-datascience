@@ -14,7 +14,7 @@ function(res) {
 }
 
 #* @get /api/health
-function() list(status = "ok")
+function() list(status = "ok", ready = file.exists(MODEL_BUNDLE_PATH))
 
 #* @get /api/metadata
 function() {

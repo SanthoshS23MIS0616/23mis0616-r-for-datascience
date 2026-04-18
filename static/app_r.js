@@ -73,7 +73,23 @@ function setStatus(message) { statusEl.textContent = message; }
 function setSoilEstimateNote(message) { if (soilEstimateNoteEl) soilEstimateNoteEl.textContent = message; }
 function parseFlexibleNumber(value, fallback = null) { if (value === null || value === undefined) return fallback; const cleaned = String(value).trim().replace(/,/g, ""); if (!cleaned) return fallback; const parsed = Number(cleaned); return Number.isFinite(parsed) ? parsed : fallback; }
 function formatNumber(value, digits = 2) { if (!Number.isFinite(value)) return "--"; return Number(value).toFixed(digits); }
-function unboxValue(value) { if (Array.isArray(value) && value.length === 1) return unboxValue(value[0]); if (Array.isArray(value)) return value.map(unboxValue); if (value && typeof value === "object") { return Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, unboxValue(inner)])); } return value; }
+function unboxValue(value) {
+  if (Array.isArray(value)) {
+    const mapped = value.map(unboxValue);
+    if (mapped.length === 1) {
+      const [first] = mapped;
+      if (first === null || ["string", "number", "boolean"].includes(typeof first)) {
+        return first;
+      }
+    }
+    return mapped;
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, unboxValue(inner)]));
+  }
+  return value;
+}
+function ensureArray(value) { if (Array.isArray(value)) return value; if (value === null || value === undefined) return []; return [value]; }
 function setNumericInputValue(fieldName, value, digits = 2) { const input = document.getElementById(fieldName); if (!input || !Number.isFinite(value)) return; input.value = formatNumber(value, digits); }
 
 function createField(config, defaultValue) {
@@ -139,9 +155,10 @@ function renderPlotImages(assets) {
 
 function renderRejectedCrops(rejected) {
   rejectedCropsEl.innerHTML = "";
-  if (!rejected?.length) { rejectedCropsEl.innerHTML = "<p>No crops were rejected for the current date and field condition.</p>"; return; }
+  const rejectedItems = ensureArray(rejected);
+  if (!rejectedItems.length) { rejectedCropsEl.innerHTML = "<p>No crops were rejected for the current date and field condition.</p>"; return; }
   const list = document.createElement("ul"); list.className = "rejection-list";
-  rejected.forEach((item) => { const li = document.createElement("li"); li.textContent = `${item.crop}: ${item.reason}`; list.appendChild(li); });
+  rejectedItems.forEach((item) => { const li = document.createElement("li"); li.textContent = `${item.crop}: ${item.reason}`; list.appendChild(li); });
   rejectedCropsEl.appendChild(list);
 }
 
@@ -176,18 +193,20 @@ function renderExplainabilityMetadata(meta) {
 }
 
 function renderPredictionExplainability(result) {
-  const liveModelOverview = (result.explainability?.model_overview || []).filter((item) => ["Ensemble", "Random Forest"].includes(String(item.model || "")));
+  const liveModelOverview = ensureArray(result.explainability?.model_overview).filter((item) => ["Ensemble", "Random Forest"].includes(String(item.model || "")));
   renderLocalExplanation(result.explainability);
   renderRejectedCrops(result.rejected_crops || []);
   renderGraphRows(liveModelOverview);
   renderCandidateModels();
-  renderGlobalFeatures(result.explainability?.global_top_features || []);
+  renderGlobalFeatures(ensureArray(result.explainability?.global_top_features));
   renderPlotImages(result.explainability || {});
   xaiPanel.classList.remove("hidden");
 }
 
 function renderResults(result) {
-  const best = result.top_crops[0];
+  const topCrops = ensureArray(result.top_crops);
+  if (!topCrops.length) throw new Error("Prediction response did not include any crop recommendations.");
+  const best = topCrops[0];
   bestCropEl.classList.remove("hidden");
   bestCropEl.innerHTML = `<h3>Best Crop: ${best.crop}</h3><p>Sow in ${best.sowing_month}, expect harvest in ${best.harvest_month}, with a conservative yield of ${best.expected_yield_t_ha.toFixed(2)} t/ha, estimated profit of ${best.profit.toFixed(2)} for your full land. The first 4 results prioritize lower or medium spend, and the 5th slot keeps one higher-spend, higher-profit option.</p><p>Final score ${best.final_score.toFixed(4)}.</p>`;
   const ideal = result.ideal_ground_recommendation;
@@ -196,7 +215,7 @@ function renderResults(result) {
     idealGroundEl.innerHTML = `<h3>Ideal Ground Crop: ${ideal.crop}</h3><p>This is the separate safe long-term recommendation for your land, independent of this month. It focuses on land fit, lower risk, lower cost, and stable profit instead of immediate sowing timing.</p><p>Land suitability ${ideal.land_suitability.toFixed(4)}, expected yield ${ideal.expected_yield_t_ha.toFixed(2)} t/ha, stable price ${ideal.stable_price_rs_per_kg.toFixed(2)} ₹/kg, cost ${ideal.total_cost_rs_per_ha.toFixed(2)} ₹/ha, profit ${ideal.profit_rs_per_ha.toFixed(2)} ₹/ha, risk ${ideal.risk.toFixed(4)}, and ideal score ${ideal.ideal_ground_score.toFixed(4)}.</p><p>${(ideal.why || []).slice(0, 3).join(" ")}</p>`;
   } else { idealGroundEl.classList.add("hidden"); idealGroundEl.innerHTML = ""; }
   tbody.innerHTML = "";
-  result.top_crops.forEach((item) => {
+  topCrops.forEach((item) => {
     const row = document.createElement("tr");
     row.innerHTML = `<td>${item.crop}</td><td>${item.sowing_month}</td><td>${item.harvest_month}</td><td>${item.duration_months}</td><td>${item.yield_start_month}</td><td>${item.expected_yield_t_ha.toFixed(2)}</td><td>${item.adjusted_price_rs_per_kg.toFixed(2)}</td><td>${item.total_cost_rs_per_ha.toFixed(2)}</td><td>${item.revenue_rs_per_ha.toFixed(2)}</td><td>${item.profit_rs_per_ha.toFixed(2)}</td><td>${item.risk.toFixed(4)}</td><td>${item.sustainability_score.toFixed(4)}</td><td>${item.final_score.toFixed(4)}</td>`;
     tbody.appendChild(row);
@@ -220,7 +239,22 @@ async function fetchSoilEstimate(payload) {
     body: JSON.stringify(payload),
   });
   const data = unboxValue(await response.json());
-  if (!response.ok) throw new Error(data.detail || "Soil estimation failed");
+  if (!response.ok) {
+    if (response.status === 404 && metadata?.dataset_summary?.default_inputs) {
+      const defaults = metadata.dataset_summary.default_inputs;
+      return {
+        nitrogen: Number(defaults.nitrogen),
+        phosphorous: Number(defaults.phosphorous),
+        potassium: Number(defaults.potassium),
+        ph: Number(defaults.ph),
+        moisture: Number(defaults.moisture),
+        matched_rows: 0,
+        confidence_score: 0.35,
+        source: "metadata defaults fallback",
+      };
+    }
+    throw new Error(data.detail || "Soil estimation failed");
+  }
   return data;
 }
 function applySoilEstimate(estimate) {
@@ -234,7 +268,9 @@ function applySoilEstimate(estimate) {
   setSoilEstimateNote(`Auto-estimated soil values loaded from similar current project dataset records. Matched rows: ${estimate.matched_rows || "--"}, confidence: ${confidence}.`);
 }
 async function fetchWeather(lat, lng) {
-  const [liveWeather, history] = await Promise.all([fetchLiveWeather(lat, lng), fetchRainfallHistory(lat, lng)]);
+  const [liveWeatherResult, historyResult] = await Promise.allSettled([fetchLiveWeather(lat, lng), fetchRainfallHistory(lat, lng)]);
+  const liveWeather = liveWeatherResult.status === "fulfilled" ? liveWeatherResult.value : {};
+  const history = historyResult.status === "fulfilled" ? historyResult.value : {};
   const currentRain = liveWeather.currentRain;
   let modelRainfall = null;
   if (Number.isFinite(history.climateMonthlyEquivalent) && Number.isFinite(history.recent30Total)) modelRainfall = 0.7 * history.climateMonthlyEquivalent + 0.3 * history.recent30Total;
@@ -248,14 +284,20 @@ async function fetchWeather(lat, lng) {
   if (liveWeather.humidity !== undefined) setNumericInputValue("humidity", liveWeather.humidity, 0);
   if (modelRainfall !== undefined && modelRainfall !== null) setNumericInputValue("rainfall_mm", modelRainfall, 2);
   const soilEstimate = await fetchSoilEstimate({
-    temperature_c: parseFlexibleNumber(document.getElementById("temperature_c")?.value),
-    humidity: parseFlexibleNumber(document.getElementById("humidity")?.value),
-    rainfall_mm: parseFlexibleNumber(document.getElementById("rainfall_mm")?.value),
+    temperature_c: parseFlexibleNumber(document.getElementById("temperature_c")?.value, parseFlexibleNumber(metadata?.dataset_summary?.default_inputs?.temperature_c)),
+    humidity: parseFlexibleNumber(document.getElementById("humidity")?.value, parseFlexibleNumber(metadata?.dataset_summary?.default_inputs?.humidity)),
+    rainfall_mm: parseFlexibleNumber(document.getElementById("rainfall_mm")?.value, parseFlexibleNumber(metadata?.dataset_summary?.default_inputs?.rainfall_mm)),
     state_name: metadata?.dataset_summary?.default_inputs?.state_name || null,
     district_name: metadata?.dataset_summary?.default_inputs?.district_name || null,
     season: metadata?.dataset_summary?.default_inputs?.season || null,
+  }).catch((error) => {
+    setSoilEstimateNote(`Automatic soil estimation could not be completed: ${error.message}. Using current values or defaults instead.`);
+    return null;
   });
-  applySoilEstimate(soilEstimate);
+  if (soilEstimate) applySoilEstimate(soilEstimate);
+  if (liveWeatherResult.status !== "fulfilled" && historyResult.status !== "fulfilled" && !soilEstimate) {
+    throw new Error("Weather and soil estimation failed for this location. You can still enter values manually.");
+  }
 }
 function setAnchorLocation(lat, lng) { state.latitude = lat; state.longitude = lng; updateCoordsDisplay(); if (!anchorMarker) anchorMarker = L.marker([lat, lng]).addTo(map); else anchorMarker.setLatLng([lat, lng]); }
 async function syncLocationAndWeather(lat, lng) {

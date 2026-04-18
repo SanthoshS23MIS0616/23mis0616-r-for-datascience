@@ -1,0 +1,4 @@
+.git
+rlib
+tmp_*.txt
+__pycache__
