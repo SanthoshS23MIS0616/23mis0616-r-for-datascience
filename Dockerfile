@@ -18,14 +18,17 @@ RUN apt-get update \
        gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-RUN R -q -e "options(repos = c(CRAN = 'https://cloud.r-project.org')); install.packages(c('plumber','nnet','e1071','randomForest'), Ncpus = max(1L, parallel::detectCores() - 1L))"
-
 COPY R ./R
+COPY install_packages.R ./
+
+RUN Rscript install_packages.R \
+    && R -q -e "pkgs <- c('plumber','nnet','e1071','randomForest'); missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]; if (length(missing)) stop(sprintf('Missing R packages: %s', paste(missing, collapse = ', ')))"
+
 COPY data ./data
 COPY models ./models
 COPY reports ./reports
 COPY static ./static
-COPY plumber.R run_api.R train_models.R install_packages.R ./
+COPY plumber.R run_api.R train_models.R ./
 
 EXPOSE 10000
 

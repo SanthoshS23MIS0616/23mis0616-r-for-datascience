@@ -7,4 +7,8 @@ missing <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TR
 if (length(missing)) {
   install.packages(missing, lib = .libPaths()[1], repos = "https://cloud.r-project.org")
 }
+still_missing <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TRUE)]
+if (length(still_missing)) {
+  stop(sprintf("Missing required R packages after installation: %s", paste(still_missing, collapse = ", ")))
+}
 cat("R dependencies ready in", .libPaths()[1], "\n")
