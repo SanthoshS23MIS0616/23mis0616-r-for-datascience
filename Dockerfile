@@ -33,3 +33,11 @@ COPY plumber.R run_api.R train_models.R ./
 EXPOSE 10000
 
 CMD ["sh", "-c", "Rscript run_api.R"]
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libz-dev \
+    zlib1g-dev \
+    libsodium-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*

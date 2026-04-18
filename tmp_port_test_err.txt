@@ -1,3 +1,4 @@
 Starting plumber on port 8001
 Running plumber API at http://0.0.0.0:8001
 Running swagger Docs at http://127.0.0.1:8001/__docs__/
+^C
